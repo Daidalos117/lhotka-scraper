@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import PocketBase from 'pocketbase';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
@@ -8,8 +9,13 @@ const pb = new PocketBase('http://pocketbase-zgvssk3wql5l59p3dgc6hequ.188.245.41
 const formatTemperature = (tempString) => tempString.trim().replace('°C', '').replace(",", ".");
 
 async function runScraper() {
+  if (!process.env.PB_EMAIL || !process.env.PB_PASSWORD) {
+    console.error('Chyba: PB_EMAIL a PB_PASSWORD musí být nastaveny.');
+    process.exit(1);
+  }
+
   try {
-    await pb.collection('users').authWithPassword('lhotka_creator@yopmail.com', 'VoHA#5f4GMTDiDk7zCn28xiwTiPKiWGN*0%*jpfV3e4Otzlr!M');
+    await pb.collection('users').authWithPassword(process.env.PB_EMAIL, process.env.PB_PASSWORD);
 
     const { data } = await axios.get('https://www.koupaliste-lhotka.cz/');
     const $ = cheerio.load(data);
